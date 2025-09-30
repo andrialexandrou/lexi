@@ -108,7 +108,7 @@ impl Default for Config {
             api_key: String::new(),
             base_url: String::new(),
             temperature: 0.1,
-            max_tokens: 2000,
+            max_tokens: 8192,
         }
     }
 }
@@ -612,28 +612,35 @@ Generate clean, production-ready code with proper function names and structure."
         Ok(azure_response.choices[0].message.content.clone())
     }
 
-    fn extract_code_from_response(&self, response: &str, _target: &str) -> String {
-        // Remove markdown code blocks if present
+    fn extract_code_from_response(&self, response: &str, target: &str) -> String {
+        // Remove markdown code blocks
         let mut code = response
+            .replace("```html", "")
             .replace("```javascript", "")
             .replace("```python", "")
             .replace("```java", "")
             .replace("```cpp", "")
             .replace("```rust", "")
             .replace("```go", "")
+            .replace("```typescript", "")
+            .replace("```css", "")
+            .replace("```sql", "")
             .replace("```", "");
 
-        // Remove leading/trailing whitespace
         code = code.trim().to_string();
 
-        // Find first line that looks like code
         let lines: Vec<&str> = code.lines().collect();
         let mut start_index = 0;
         let mut end_index = lines.len();
 
+        // Find first line that looks like code
         for (i, line) in lines.iter().enumerate() {
             let trimmed = line.trim();
-            if trimmed.starts_with("function ")
+            if trimmed.starts_with("<!DOCTYPE")
+                || trimmed.starts_with("<html")
+                || trimmed.starts_with("<head")
+                || trimmed.starts_with("<?xml")
+                || trimmed.starts_with("function ")
                 || trimmed.starts_with("def ")
                 || trimmed.starts_with("class ")
                 || trimmed.starts_with("import ")
@@ -641,18 +648,31 @@ Generate clean, production-ready code with proper function names and structure."
                 || trimmed.starts_with("let ")
                 || trimmed.starts_with("var ")
                 || trimmed.starts_with("#include")
+                || trimmed.starts_with("SELECT")
+                || trimmed.starts_with("CREATE")
             {
                 start_index = i;
                 break;
             }
         }
 
-        // Find last line that looks like code
-        for (i, line) in lines.iter().enumerate().rev() {
-            let trimmed = line.trim();
-            if !trimmed.is_empty() && !trimmed.starts_with("Note:") && !trimmed.starts_with("Example:") {
-                end_index = i + 1;
-                break;
+        // For HTML, find the closing tag
+        if target == "html" {
+            for (i, line) in lines.iter().enumerate().rev() {
+                let trimmed = line.trim();
+                if trimmed == "</html>" {
+                    end_index = i + 1;
+                    break;
+                }
+            }
+        } else {
+            // Existing logic for other languages
+            for (i, line) in lines.iter().enumerate().rev() {
+                let trimmed = line.trim();
+                if !trimmed.is_empty() && !trimmed.starts_with("Note:") && !trimmed.starts_with("Example:") {
+                    end_index = i + 1;
+                    break;
+                }
             }
         }
 
