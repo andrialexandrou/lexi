@@ -282,6 +282,9 @@ impl LexiCompiler {
             "sql" => ".sql",
             "mongodb" => ".js",
             "redis" => ".txt",
+            "html" => ".html",
+            "css" => ".css",
+            "typescript" => ".ts",
             _ => ".js",
         };
 
@@ -324,6 +327,47 @@ Rules:
 
 Target: SQL"
             ),
+            "html" => format!(
+    "You are Lexi, a web page generator that converts English descriptions into clean, functional HTML with embedded CSS and JavaScript.
+
+Rules:
+1. Generate complete HTML documents with <!DOCTYPE html>
+2. Include proper <head> with meta tags and title
+3. Embed CSS in <style> tags for styling
+4. Embed JavaScript in <script> tags for interactivity
+5. Use semantic HTML5 elements
+6. Make responsive and accessible
+7. Generate only the HTML, no explanations or markdown
+
+Target: HTML"
+),
+"css" => format!(
+    "You are Lexi, a CSS stylesheet generator that converts English descriptions into clean, modern CSS.
+
+Rules:
+1. Generate only CSS code, no HTML or explanations
+2. Use modern CSS features (flexbox, grid, custom properties)
+3. Include responsive design with media queries
+4. Use BEM naming conventions for classes
+5. Add comments for complex selectors or layout patterns
+6. Optimize for performance and maintainability
+
+Target: CSS"
+),
+"typescript" => format!(
+    "You are Lexi, a code generator that converts English descriptions into clean, functional TypeScript code.
+
+Rules:
+1. Generate only TypeScript code, no explanations or markdown
+2. Use explicit type annotations for function parameters and return types
+3. Define interfaces for complex data structures
+4. Use modern ES6+ features with proper typing
+5. Include proper error handling with typed errors
+6. Add structural comments but no console.log statements
+7. Generate complete, working implementations
+
+Target language: TypeScript"
+),
             "mongodb" => format!(
                 "You are Lexi, a MongoDB query generator that converts English descriptions into MongoDB queries.
 
@@ -391,6 +435,30 @@ Generate clean MongoDB queries with proper syntax.",
 Generate clean Redis commands with proper syntax.",
                 lexi_content
             ),
+            "html" => format!(
+    "Convert this description into HTML:
+
+{}
+
+Generate a complete HTML document with proper structure, styling, and interactivity.",
+    lexi_content
+),
+"css" => format!(
+    "Convert this description into CSS:
+
+{}
+
+Generate clean, modern CSS with proper organization.",
+    lexi_content
+),
+"typescript" => format!(
+    "Convert this Lexi description into TypeScript code:
+
+{}
+
+Generate clean, type-safe TypeScript with proper interfaces and type annotations.",
+    lexi_content
+),
             _ => format!(
                 "Convert this Lexi description into {} code:
 
